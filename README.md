@@ -6,21 +6,25 @@ Download movies from YouTube with this script
 ```
 python -m pip install pytube
 ```
-2. You create the `YouTube_Downloader` class element
+2. import download_playlist and  download_video_audio from youtube_downloader
 ```
-yd = YouTube_Downloader(verbose=True)
+from youtube_downloader import download_video_audio, download_playlist
 ```
-3. use this Code
+3. use this Code 
+3.1 **for Download Playlist**
 ```
-yd.download_by_txt_file(path='./text.txt')
-yd.download_by_txt_file(path='./txtfolder')
+playlist_url = [] # list of Urls or string of url
+BASE_DIR = "."                                                   # set Base Directory
+download_playlist(playlist_url,audio=False, BASE_DIR=BASE_DIR)   # for Video Downloader
+download_playlist(playlist_url,audio=True, BASE_DIR=BASE_DIR)    # for Audio Downloader
 ```
-**or**
-```
-yd.download_by_url(youtube_url='https://youtube.com/')
-```
-You can use the following two methods to use download_by_txt_file
-1. Put all the links in one file and send its location to this function
-2. save the links in separate files and send the folder address to this function
+3.2 **for Download Video_Audio**
 
-To use download_by_url, you must set URL = URL
+```
+Video_or_audio_url = []                                                   # list of Urls or string of url
+BASE_DIR = "."                                                            # set Base Directory
+name = "directory_name"                                                   # set Directory name
+download_video_audio(Video_or_audio_url,audio=False, BASE_DIR=BASE_DIR)   # for Video Downloader
+download_video_audio(Video_or_audio_url,audio=True, BASE_DIR=BASE_DIR)    # for Audio Downloader
+```
+
