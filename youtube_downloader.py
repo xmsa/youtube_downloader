@@ -1,8 +1,22 @@
 import os
 from pytube import YouTube
-from tqdm import tqdm
+
 from pytube import Playlist
 # from pytube.contrib.playlist import Playlist
+
+def run_inside_jupyter():
+    try:
+        get_ipython = __import__("IPython").get_ipython
+        if 'IPKernelApp' not in get_ipython().config:
+            return False
+    except:
+        return False
+    return True
+
+if run_inside_jupyter():
+    from tqdm.notebook import tqdm
+else:
+    from tqdm import tqdm
 
 
 def remove_Duplicate(list_):
