@@ -70,7 +70,7 @@ def download_playlist(playlist_url, audio=False, BASE_DIR="."):
         fail_ = []
         playlist_url_list = playlist_url
         for playlist_url in tqdm(playlist_url_list):
-            f = download_playlist(playlist_url_list, audio, BASE_DIR)
+            f = download_playlist(playlist_url, audio, BASE_DIR)
             fail_ += f
         return fail_
     play_list = Playlist(playlist_url)
