@@ -1,8 +1,9 @@
 import os
 from pytube import YouTube
-
+from pydub import AudioSegment
 from pytube import Playlist
 # from pytube.contrib.playlist import Playlist
+
 
 def run_inside_jupyter():
     try:
@@ -12,6 +13,7 @@ def run_inside_jupyter():
     except:
         return False
     return True
+
 
 if run_inside_jupyter():
     from tqdm.notebook import tqdm
@@ -34,7 +36,7 @@ def remove_Duplicate(list_):
     return list__
 
 
-def download_video_audio(url, BASE_DIR, name="temp", audio=False):
+def download_video_audio(url, BASE_DIR, high_quality=True, name="temp", audio=False):
     """Download a single or multi video from youtube and save it in BASE_DIR with name as the folder name.
     Parameters:
         url: str or list: url of the video.
@@ -60,7 +62,10 @@ def download_video_audio(url, BASE_DIR, name="temp", audio=False):
         if audio:
             YouTube(url).streams.get_audio_only().download(dir_path)
         else:
-            YouTube(url).streams.get_highest_resolution().download(dir_path)
+            if high_quality:
+                YouTube(url).streams.get_highest_resolution().download(dir_path)
+            else:
+                YouTube(url).streams.().download(dir_path)
     except KeyboardInterrupt:
         return
     except Exception as ex:
@@ -112,3 +117,45 @@ def download_playlist(playlist_url, audio=False, BASE_DIR="."):
         print("fail:", fail_)
     print("Done ...")
     return fail_
+
+
+def convert_to_mp3(input_, output_dir=None):
+    '''
+    Convert a Audio or Video to mp3 format.
+    Parameters:
+        input_: str: Path of the video.
+        output_dir: str: Path to save the mp3 file.
+    Returns:
+        None: if conversion is successful.
+        str: input_ if conversion fails.
+    '''
+
+    if output_dir is None:
+        if os.path.isfile(input_):
+            dir_path = os.path.dirname(input_)
+        else:
+            if input_.endswith("/"):
+                input_ = input_[:-1]
+            dir_path = input_
+        dir_path_ = os.path.dirname(dir_path)
+
+        output_dir = os.path.join(dir_path_, "mp3")
+
+    if os.path.isdir(input_):
+        fail = []
+        for i in os.listdir(input_):
+            f = convert_to_mp3(os.path.join(input_, i), output_dir=output_dir)
+            fail.append(f)
+    else:
+        try:
+
+            path, filename = os.path.split(input_)
+            file_name, file_extension = os.path.splitext(filename)
+            dir_path = os.path.dirname(input_)
+
+            output_file = os.path.join(output_dir, file_name + '.mp3')
+
+            audio = AudioSegment.from_file(input_)
+            audio.export(output_file, format="mp3")
+        except:
+            return input_
