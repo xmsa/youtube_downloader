@@ -3,6 +3,8 @@ from pytube import YouTube
 from pydub import AudioSegment
 from pytube import Playlist
 # from pytube.contrib.playlist import Playlist
+from pytube.innertube import _default_clients
+_default_clients["ANDROID_MUSIC"] = _default_clients["ANDROID_CREATOR"]
 
 
 def run_inside_jupyter():
@@ -69,7 +71,8 @@ def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False
         fail_ = []
         url_list = remove_Duplicate(url)
         for url in tqdm(url_list):
-            f = download_video_audio(url, BASE_DIR, name, audio)
+            f = download_video_audio(
+                url=url, BASE_DIR=BASE_DIR, quality=quality, name=name, audio=audio)
             if f:
                 fail_.append(f)
         return fail_
@@ -77,10 +80,9 @@ def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False
 
     os.makedirs(dir_path, exist_ok=True)
     try:
-        streams = None
-        yt = YouTube(url)
+        streams = YouTube(url).streams
         if audio:
-            streams = yt.streams.filter(
+            streams = streams.filter(
                 only_audio=True).order_by('abr').desc().first()
         else:
             streams = select_resolution(streams=streams, resolution=quality)
@@ -110,35 +112,16 @@ def download_playlist(playlist_url, audio=False, quality="480p", BASE_DIR="."):
         fail_ = []
         playlist_url_list = playlist_url
         for playlist_url in tqdm(playlist_url_list):
-            f = download_playlist(playlist_url, audio, BASE_DIR)
+            f = download_playlist(playlist_url=playlist_url,
+                                  audio=audio, quality=quality, BASE_DIR=BASE_DIR)
             fail_ += f
         return fail_
     play_list = Playlist(playlist_url)
-
+    url = list(map(str, play_list.video_urls))
     name = play_list.title
-    print(name)
-    dir_path = os.path.join(BASE_DIR, name)
-    os.makedirs(dir_path, exist_ok=True)
-
-    fail_ = []
-    for video, url in tqdm(
-            zip(play_list.videos, play_list.video_urls), total=len(play_list.videos)):
-        try:
-            streams = video.streams
-            if audio:
-                streams = streams.filter(
-                    only_audio=True).order_by('abr').desc().first()
-            else:
-                streams = select_resolution(
-                    streams=streams, resolution=quality)
-
-            streams.download(dir_path)
-        except KeyboardInterrupt:
-            return
-        except Exception as ex:
-            print("Error: ", ex)
-            print(url)
-            fail_.append(url)
+    print(play_list.title)
+    fail_ = download_video_audio(
+        url=url, BASE_DIR=BASE_DIR, quality=quality, name=name, audio=audio)
     if len(fail_) > 0:
         print("fail:", fail_)
 
