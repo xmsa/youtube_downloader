@@ -36,13 +36,31 @@ def remove_Duplicate(list_):
     return list__
 
 
-def download_video_audio(url, BASE_DIR, high_quality=True, name="temp", audio=False):
+def select_resolution(streams, resolution):
+    if resolution == "best":
+        return streams.filter(progressive=False, file_extension='mp4').order_by(
+            'resolution').desc().first()
+    elif resolution == "low":
+        return streams.filter(file_extension='mp4').order_by(
+            'resolution').asc().first()
+    else:
+        all_resolution = ["1080p", "720p", "480p", "360p", "240p"]
+        index = all_resolution.index(resolution)
+        all_resolution = all_resolution[index:]
+        for resolution in all_resolution:
+            s = streams.filter(res=resolution)
+            if len(s):
+                return s.order_by('resolution').desc().first()
+
+
+def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False):
     """Download a single or multi video from youtube and save it in BASE_DIR with name as the folder name.
     Parameters:
         url: str or list: url of the video.
         BASE_DIR: str: Base directory to save the video.
         name: str: Folder name to save the video.
         audio: bool: True to download audio only.
+        quality: str: Resolution of the video. Default is 480p. best, low, 1080p, 720p, 480p, 360p, 240p.
     Returns:
         None: if download is successful.
         str: url of the video if download fails.
@@ -59,13 +77,15 @@ def download_video_audio(url, BASE_DIR, high_quality=True, name="temp", audio=Fa
 
     os.makedirs(dir_path, exist_ok=True)
     try:
+        streams = None
+        yt = YouTube(url)
         if audio:
-            YouTube(url).streams.get_audio_only().download(dir_path)
+            streams = yt.streams.filter(
+                only_audio=True).order_by('abr').desc().first()
         else:
-            if high_quality:
-                YouTube(url).streams.get_highest_resolution().download(dir_path)
-            else:
-                YouTube(url).streams.().download(dir_path)
+            streams = select_resolution(streams=streams, resolution=quality)
+
+        streams.download(dir_path)
     except KeyboardInterrupt:
         return
     except Exception as ex:
@@ -75,12 +95,13 @@ def download_video_audio(url, BASE_DIR, high_quality=True, name="temp", audio=Fa
     return None
 
 
-def download_playlist(playlist_url, audio=False, BASE_DIR="."):
+def download_playlist(playlist_url, audio=False, quality="480p", BASE_DIR="."):
     """Download a playlist from youtube and save it in BASE_DIR with name as the playlist name.
     Parameters:
         playlist_url: str or list: url or list of the playlist.
         BASE_DIR: str: Base directory to save the playlist.
         audio: bool: True to download audio only.
+        quality: str: Resolution of the video. Default is 480p. best, low, 1080p, 720p, 480p, 360p, 240p.
     Returns:
         Empty list: if download is successful.
         List: url of the video if download fails.
@@ -103,10 +124,15 @@ def download_playlist(playlist_url, audio=False, BASE_DIR="."):
     for video, url in tqdm(
             zip(play_list.videos, play_list.video_urls), total=len(play_list.videos)):
         try:
+            streams = video.streams
             if audio:
-                video.streams.get_audio_only().download(dir_path)
+                streams = streams.filter(
+                    only_audio=True).order_by('abr').desc().first()
             else:
-                video.streams.get_highest_resolution().download(dir_path)
+                streams = select_resolution(
+                    streams=streams, resolution=quality)
+
+            streams.download(dir_path)
         except KeyboardInterrupt:
             return
         except Exception as ex:
@@ -115,6 +141,7 @@ def download_playlist(playlist_url, audio=False, BASE_DIR="."):
             fail_.append(url)
     if len(fail_) > 0:
         print("fail:", fail_)
+
     print("Done ...")
     return fail_
 
