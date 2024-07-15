@@ -45,6 +45,8 @@ def select_resolution(streams, resolution):
     elif resolution == "low":
         return streams.filter(file_extension='mp4').order_by(
             'resolution').asc().first()
+    elif resolution == "auto":
+        return streams.get_highest_resolution()
     else:
         all_resolution = ["1080p", "720p", "480p", "360p", "240p"]
         index = all_resolution.index(resolution)
@@ -62,7 +64,7 @@ def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False
         BASE_DIR: str: Base directory to save the video.
         name: str: Folder name to save the video.
         audio: bool: True to download audio only.
-        quality: str: Resolution of the video. Default is 480p. best, low, 1080p, 720p, 480p, 360p, 240p.
+        quality: str: Resolution of the video. Default is 480p. auto, best, low, 1080p, 720p, 480p, 360p, 240p.
     Returns:
         None: if download is successful.
         str: url of the video if download fails.
@@ -103,7 +105,7 @@ def download_playlist(playlist_url, audio=False, quality="480p", BASE_DIR="."):
         playlist_url: str or list: url or list of the playlist.
         BASE_DIR: str: Base directory to save the playlist.
         audio: bool: True to download audio only.
-        quality: str: Resolution of the video. Default is 480p. best, low, 1080p, 720p, 480p, 360p, 240p.
+        quality: str: Resolution of the video. Default is 480p. auto, best, low, 1080p, 720p, 480p, 360p, 240p.
     Returns:
         Empty list: if download is successful.
         List: url of the video if download fails.
