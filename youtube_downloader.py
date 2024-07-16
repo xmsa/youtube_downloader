@@ -156,7 +156,7 @@ def convert_to_mp3(input_, output_dir=None):
 
     if os.path.isdir(input_):
         fail = []
-        for i in os.listdir(input_):
+        for i in tqdm(os.listdir(input_)):
             f = convert_to_mp3(os.path.join(input_, i), output_dir=output_dir)
             fail.append(f)
     else:
