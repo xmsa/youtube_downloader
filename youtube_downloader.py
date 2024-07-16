@@ -132,7 +132,7 @@ def download_playlist(playlist_url, audio=False, quality="480p", BASE_DIR="."):
     return fail_
 
 
-def convert_to_mp3(input_, output_dir=None):
+def convert_to_mp3(input_path, output_path=None):
     '''
     Convert a Audio or Video to mp3 format.
     Parameters:
@@ -142,33 +142,41 @@ def convert_to_mp3(input_, output_dir=None):
         None: if conversion is successful.
         str: input_ if conversion fails.
     '''
-
-    if output_dir is None:
-        if os.path.isfile(input_):
-            dir_path = os.path.dirname(input_)
+    file_name_ = None
+    if output_path is None:
+        if input_path.endswith("/"):
+            input_path = input_path[:-1]
+        if os.path.isfile(input_path):
+            output_path = os.path.dirname(input_path)
+            file_name_ = os.path.basename(input_path)
         else:
-            if input_.endswith("/"):
-                input_ = input_[:-1]
-            dir_path = input_
-        dir_path_ = os.path.dirname(dir_path)
+            output_path = input_path
+        file_name = os.path.basename(output_path)
+        output_path = os.path.dirname(output_path)
+        output_path = os.path.join(output_path,"mp3",file_name)
 
-        output_dir = os.path.join(dir_path_, "mp3")
+    if os.path.isfile(input_path):
+        path, filename = os.path.split(input_path)
+        if file_name_:
+            output_path = os.path.join(output_path,filename)
 
-    if os.path.isdir(input_):
-        fail = []
-        for i in tqdm(os.listdir(input_)):
-            f = convert_to_mp3(os.path.join(input_, i), output_dir=output_dir)
-            fail.append(f)
-    else:
+        output_path, file_extension = os.path.splitext(output_path)
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_path+= ".mp3"
+
         try:
-
-            path, filename = os.path.split(input_)
-            file_name, file_extension = os.path.splitext(filename)
-            dir_path = os.path.dirname(input_)
-
-            output_file = os.path.join(output_dir, file_name + '.mp3')
-
-            audio = AudioSegment.from_file(input_)
-            audio.export(output_file, format="mp3")
+            print(input_path)
+            audio = AudioSegment.from_file(input_path)
+            audio.export(output_path, format="mp3")
+        except KeyboardInterrupt:
+            return False
         except:
-            return input_
+            return input_path
+    else:
+        fails = []
+        for file_path in tqdm(os.listdir(input_path)):
+            output_path_ = os.path.join(output_path,file_path)
+            fail = convert_to_mp3(os.path.join(input_path,file_path),output_path_)
+            if fail == False:
+                return False
+            fails.append(fail)
