@@ -87,7 +87,8 @@ def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False
             streams = streams.filter(
                 only_audio=True).order_by('abr').desc().first()
         else:
-            streams = select_resolution(streams=streams, resolution=quality)
+            # streams = select_resolution(streams=streams, resolution=quality)
+            streams = streams.get_highest_resolution()
 
         streams.download(dir_path)
     except KeyboardInterrupt:
