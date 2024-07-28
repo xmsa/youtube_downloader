@@ -153,16 +153,16 @@ def convert_to_mp3(input_path, output_path=None):
             output_path = input_path
         file_name = os.path.basename(output_path)
         output_path = os.path.dirname(output_path)
-        output_path = os.path.join(output_path,"mp3",file_name)
+        output_path = os.path.join(output_path, "mp3", file_name)
 
     if os.path.isfile(input_path):
         path, filename = os.path.split(input_path)
         if file_name_:
-            output_path = os.path.join(output_path,filename)
+            output_path = os.path.join(output_path, filename)
 
         output_path, file_extension = os.path.splitext(output_path)
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        output_path+= ".mp3"
+        output_path += ".mp3"
 
         try:
             print(input_path)
@@ -175,8 +175,39 @@ def convert_to_mp3(input_path, output_path=None):
     else:
         fails = []
         for file_path in tqdm(os.listdir(input_path)):
-            output_path_ = os.path.join(output_path,file_path)
-            fail = convert_to_mp3(os.path.join(input_path,file_path),output_path_)
+            output_path_ = os.path.join(output_path, file_path)
+            fail = convert_to_mp3(os.path.join(
+                input_path, file_path), output_path_)
             if fail == False:
                 return False
             fails.append(fail)
+
+
+def read_link(file_path: str = "link.txt") -> list:
+    ''' Read the links from the file and return a list of links.
+    Parameters:
+        file_path: str: Path of the file.
+    Returns:
+        list: list: List of links.
+    '''
+    list_ = []
+    with open(file_path, "r") as f:
+        for i in f:
+            list_.append(i.strip())
+    return list_
+
+
+def print_title(playlist_url: list = None, video_urllist: list = None) -> None:
+    '''Print the title of the playlist and video list.   
+    Parameters:
+        playlist: list: List of playlist links.
+        video_list: list: List of video links.
+    '''
+    if playlist_url:
+        print("-"*10, "Playlist", "-"*10)
+        for url in playlist_url:
+            print(url, Playlist(url).title)
+    if video_urllist:
+        print("-"*10, "Videolist", "-"*10)
+        for url in video_urllist:
+            print(url, YouTube(url).title)
