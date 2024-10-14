@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pytube import Playlist
 # from pytube.contrib.playlist import Playlist
 from pytube.innertube import _default_clients
-_default_clients["ANDROID_MUSIC"] = _default_clients["ANDROID_CREATOR"]
+# _default_clients["ANDROID_MUSIC"] = _default_clients["ANDROID_CREATOR"]
 
 
 def run_inside_jupyter():
