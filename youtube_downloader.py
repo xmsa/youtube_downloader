@@ -92,7 +92,7 @@ def download_video_audio(url, BASE_DIR, quality="480p", name="temp", audio=False
 
         streams.download(dir_path)
     except KeyboardInterrupt:
-        return
+        raise KeyboardInterrupt
     except Exception as ex:
         print("Error: ", ex)
         print(url)
